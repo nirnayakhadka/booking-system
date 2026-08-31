@@ -1,11 +1,11 @@
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
-import { NavBar } from './components/NavBar'
-import { ServiceListPage } from './features/services/ServiceListPage'
-import { ServiceDetailsPage } from './features/services/ServiceDetailsPage'
-import { BookingPage } from './features/booking/BookingPage'
-import { MyBookingsPage } from './features/bookings/MyBookingsPage'
-import { BookingDetailsPage } from './features/bookings/BookingDetailsPage'
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { NavBar } from "./components/NavBar";
+import { ServiceListPage } from "./features/services/ServiceListPage";
+import { ServiceDetailsPage } from "./features/services/ServiceDetailsPage";
+import { BookingPage } from "./features/booking/BookingPage";
+import { MyBookingsPage } from "./features/bookings/MyBookingsPage";
+import { BookingDetailsPage } from "./features/bookings/BookingDetailsPage";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -14,7 +14,7 @@ const queryClient = new QueryClient({
       staleTime: 30_000,
     },
   },
-})
+});
 
 export default function App() {
   return (
@@ -25,14 +25,23 @@ export default function App() {
           <main>
             <Routes>
               <Route path="/" element={<ServiceListPage />} />
-              <Route path="/services/:serviceId" element={<ServiceDetailsPage />} />
-              <Route path="/services/:serviceId/book" element={<BookingPage />} />
+              <Route
+                path="/services/:serviceId"
+                element={<ServiceDetailsPage />}
+              />
+              <Route
+                path="/services/:serviceId/book"
+                element={<BookingPage />}
+              />
               <Route path="/bookings" element={<MyBookingsPage />} />
-              <Route path="/bookings/:bookingId" element={<BookingDetailsPage />} />
+              <Route
+                path="/bookings/:bookingId"
+                element={<BookingDetailsPage />}
+              />
             </Routes>
           </main>
         </div>
       </BrowserRouter>
     </QueryClientProvider>
-  )
+  );
 }

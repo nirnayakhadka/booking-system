@@ -5,24 +5,30 @@
  * from re-inventing its own spinner/error markup.
  */
 
-export function LoadingState({ label = 'Loading...' }: { label?: string }) {
+export function LoadingState({ label = "Loading..." }: { label?: string }) {
   return (
-    <div role="status" className="flex items-center justify-center py-16 text-gray-500">
+    <div
+      role="status"
+      className="flex items-center justify-center py-16 text-secondary"
+    >
       <span className="animate-pulse">{label}</span>
     </div>
-  )
+  );
 }
 
 export function ErrorState({
-  message = 'Something went wrong.',
+  message = "Something went wrong.",
   onRetry,
 }: {
-  message?: string
-  onRetry?: () => void
+  message?: string;
+  onRetry?: () => void;
 }) {
   return (
-    <div role="alert" className="flex flex-col items-center justify-center py-16 gap-3 text-center">
-      <p className="text-red-600 font-medium">{message}</p>
+    <div
+      role="alert"
+      className="flex flex-col items-center justify-center py-16 gap-3 text-center"
+    >
+      <p className="text-red-500 font-medium">{message}</p>
       {onRetry && (
         <button
           onClick={onRetry}
@@ -32,17 +38,17 @@ export function ErrorState({
         </button>
       )}
     </div>
-  )
+  );
 }
 
 export function EmptyState({
-  message = 'Nothing to show yet.',
+  message = "Nothing to show yet.",
 }: {
-  message?: string
+  message?: string;
 }) {
   return (
-    <div className="flex items-center justify-center py-16 text-gray-400 text-center">
+    <div className="flex items-center justify-center py-16 text-secondary text-center">
       {message}
     </div>
-  )
+  );
 }

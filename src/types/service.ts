@@ -5,38 +5,63 @@
  */
 
 export interface Service {
-  id: string
-  name: string
-  description: string
-  category: string
+  id: string;
+  name: string;
+  description: string;
+  category: string;
   provider: {
-    id: string
-    name: string
-  }
-  price: number
-  currency: string
-  durationMinutes: number
-  rating: number
-  isAvailable: boolean
+    id: string;
+    name: string;
+  };
+  price: number;
+  currency: string;
+  durationMinutes: number;
+  rating: number;
+  isAvailable: boolean;
 }
 
 /** Lightweight shape used in list views — avoids over-fetching full descriptions. */
 export type ServiceSummary = Pick<
   Service,
-  'id' | 'name' | 'category' | 'provider' | 'price' | 'currency' | 'rating' | 'isAvailable'
->
+  | "id"
+  | "name"
+  | "category"
+  | "provider"
+  | "price"
+  | "currency"
+  | "rating"
+  | "isAvailable"
+  | "imageUrl"
+>;
 
 export interface ServiceListParams {
-  search?: string
-  category?: string
-  page?: number
-  pageSize?: number
+  search?: string;
+  category?: string;
+  page?: number;
+  pageSize?: number;
 }
 
 export interface TimeSlot {
-  id: string
-  date: string // ISO date, e.g. "2026-09-05"
-  startTime: string // "10:00"
-  endTime: string // "10:30"
-  isAvailable: boolean
+  id: string;
+  date: string; // ISO date, e.g. "2026-09-05"
+  startTime: string; // "10:00"
+  endTime: string; // "10:30"
+  isAvailable: boolean;
+}
+
+export interface Service {
+  id: string;
+  name: string;
+  description: string;
+  category: string;
+  provider: {
+    id: string;
+    name: string;
+  };
+  price: number;
+  currency: string;
+  durationMinutes: number;
+  rating: number;
+  isAvailable: boolean;
+  imageUrl?: string;
 }
