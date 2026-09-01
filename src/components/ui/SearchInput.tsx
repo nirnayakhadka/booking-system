@@ -22,7 +22,7 @@ export const SearchInput = forwardRef<HTMLInputElement, SearchInputProps>(
         <input
           ref={ref}
           type="search"
-          className="w-full rounded-md border border-[var(--color-border)] bg-[var(--color-surface-muted)] py-2 pl-9 pr-3 text-sm text-primary placeholder:text-secondary focus:border-marketplace focus:bg-[var(--color-surface)] focus:outline-none focus:ring-1 focus:ring-marketplace"
+          className="w-full rounded-md border border-[var(--color-border)] bg-[var(--color-surface-raised)] py-2 pl-9 pr-3 text-sm text-primary placeholder:text-secondary focus:border-marketplace focus:outline-none focus:ring-1 focus:ring-marketplace"
           {...props}
         />
       </div>

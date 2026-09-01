@@ -1,20 +1,17 @@
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 import { useServices } from "../../hooks/useServices";
+import { useCategories } from "../../hooks/useCategories";
 import {
   LoadingState,
   ErrorState,
   EmptyState,
 } from "../../components/StatusStates";
+import { ServiceGridCard } from "../../components/ui/ServiceGridCard";
 import { HeroSection } from "./HeroSection";
-
-const CATEGORIES = ["Wellness", "Home Services", "Tech Support"];
 
 export function ServiceListPage() {
   const [searchParams, setSearchParams] = useSearchParams();
-  const navigate = useNavigate();
 
-  // Search is driven by the URL (set by NavBar's search box) so both stay
-  // in sync without prop-drilling or a shared context.
   const search = searchParams.get("q") ?? "";
   const category = searchParams.get("category") ?? "";
 
@@ -22,94 +19,93 @@ export function ServiceListPage() {
     search: search || undefined,
     category: category || undefined,
   });
+  const { data: categories } = useCategories();
 
-  function handleCategoryChange(value: string) {
-    const next = new URLSearchParams(searchParams);
-    if (value) {
-      next.set("category", value);
+  function selectCategory(next: string) {
+    // Keep the active search term; only the category part of the URL
+    // changes, so the service list refetches with the new filter.
+    const nextParams = new URLSearchParams(searchParams);
+    if (next) {
+      nextParams.set("category", next);
     } else {
-      next.delete("category");
+      nextParams.delete("category");
     }
-    setSearchParams(next);
+    setSearchParams(nextParams, { replace: true });
   }
 
   return (
-    <div className="max-w-5xl mx-auto px-4 py-6">
-      <div className="flex items-center justify-between mb-4">
-        <h1 className="text-2xl font-semibold text-primary">Browse Services</h1>
-        <select
-          value={category}
-          onChange={(e) => handleCategoryChange(e.target.value)}
-          className="border border-[var(--color-border)] bg-[var(--color-surface)] text-primary rounded-md px-3 py-2 text-sm"
-        >
-          <option value="">All categories</option>
-          {CATEGORIES.map((c) => (
-            <option key={c} value={c}>
-              {c}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      {isLoading && <LoadingState label="Loading services..." />}
-      {isError && (
-        <ErrorState
-          message="Couldn't load services."
-          onRetry={() => refetch()}
-        />
-      )}
-      {!isLoading && !isError && data?.items.length === 0 && (
-        <EmptyState
-          message={
-            search
-              ? `No services match "${search}".`
-              : "No services match your filters."
-          }
-        />
-      )}
-
+    <div>
       {!isLoading && !isError && data && data.items.length > 0 && (
-        <>
-          <HeroSection service={data.items[0]} />
+        <HeroSection services={data.items} />
+      )}
 
-          <ul className="grid sm:grid-cols-2 gap-4">
-            {data.items.map((service) => (
-              <li key={service.id}>
-                <button
-                  onClick={() => navigate(`/services/${service.id}`)}
-                  disabled={!service.isAvailable}
-                  className={`w-full text-left border rounded-lg p-4 transition bg-[var(--color-surface)] ${
-                    service.isAvailable
-                      ? "border-[var(--color-border)] hover:border-marketplace hover:shadow-sm"
-                      : "border-[var(--color-border)] opacity-50 cursor-not-allowed"
-                  }`}
-                >
-                  <div className="flex justify-between items-start">
-                    <h2 className="font-medium text-primary">{service.name}</h2>
-                    <span className="text-sm text-secondary">
-                      ★ {service.rating}
-                    </span>
-                  </div>
-                  <p className="text-sm text-secondary mt-1">
-                    {service.category}
-                  </p>
-                  <p className="text-sm text-secondary mt-1">
-                    {service.provider.name}
-                  </p>
-                  <p className="mt-2 font-semibold text-primary">
-                    {service.currency} {service.price}
-                  </p>
-                  {!service.isAvailable && (
-                    <p className="text-xs text-red-500 mt-1">
-                      Currently unavailable
-                    </p>
-                  )}
-                </button>
+      <div className="max-w-7xl mx-auto px-4 py-12 sm:px-6 lg:px-8">
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+          <h1 className="text-xl font-semibold text-primary">
+            {search ? `Results for "${search}"` : "Browse Services"}
+          </h1>
+
+          <nav
+            aria-label="Filter by category"
+            className="flex max-w-full gap-2 overflow-x-auto pb-1"
+          >
+            <button
+              onClick={() => selectCategory("")}
+              className={`flex-shrink-0 rounded-full px-3.5 py-1.5 text-sm font-medium transition ${
+                !category
+                  ? "bg-marketplace text-white shadow-sm"
+                  : "border border-[var(--color-border)] bg-[var(--color-surface)] text-secondary hover:border-marketplace hover:text-primary"
+              }`}
+            >
+              All
+            </button>
+            {categories?.map((cat) => (
+              <button
+                key={cat.name}
+                onClick={() => selectCategory(cat.name)}
+                className={`flex-shrink-0 rounded-full px-3.5 py-1.5 text-sm font-medium transition ${
+                  category === cat.name
+                    ? "bg-marketplace text-white shadow-sm"
+                    : "border border-[var(--color-border)] bg-[var(--color-surface)] text-secondary hover:border-marketplace hover:text-primary"
+                }`}
+              >
+                {cat.name}
+              </button>
+            ))}
+          </nav>
+        </div>
+
+        {isLoading && <LoadingState label="Loading services..." />}
+        {isError && (
+          <ErrorState
+            message="Couldn't load services."
+            onRetry={() => refetch()}
+          />
+        )}
+        {!isLoading && !isError && data?.items.length === 0 && (
+          <EmptyState
+            message={
+              search
+                ? `No services match "${search}".`
+                : "No services match your filters."
+            }
+          />
+        )}
+
+        {!isLoading && !isError && data && data.items.length > 0 && (
+          <ul className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
+            {data.items.map((service, index) => (
+              <li
+                key={service.id}
+                className="animate-fade-in-up"
+                style={{ animationDelay: `${Math.min(index, 12) * 40}ms` }}
+              >
+                <ServiceGridCard service={service} />
               </li>
             ))}
           </ul>
-        </>
-      )}
+        )}
+      </div>
     </div>
   );
 }

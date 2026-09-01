@@ -117,3 +117,54 @@ library (e.g. shadcn/ui).
 overhead with no material benefit at this scope. A component library adds
 setup and API-learning overhead disproportionate to a 2-day assignment
 where UI is explicitly the lowest-weighted evaluation criterion.
+
+---
+
+## 6. Server-error simulation is a configurable toggle, off by default
+
+**Chosen:** Every mock endpoint calls `maybeSimulateServerError()` after its
+latency delay. The probability is a module-global (`setServerErrorChance`)
+that defaults to `0`, so default runs — and the test suite — are
+deterministic, while tests (and a dev/QA tool wanting to exercise the error
+UI) can flip it to `1` and observe a normalized `SERVER_ERROR` anyway.
+
+**Why:** The assignment requires the mock to *simulate server errors*, but
+a permanent nonzero chance would make every manual/smoke test and unit test
+flaky (a test asserting "list loads OK" could randomly fail). A toggle keeps
+the error path implemented and exercisable end-to-end without sacrificing
+determinism.
+
+**Alternatives considered:** Hard-coding a small chance (e.g. 5%) into the
+mock reads/writes, or exposing a query-string look like `?simulateError=1`.
+
+**Why rejected:** A hardcoded chance makes tests non-deterministic. A
+query-string switch is harder to operate from a unit test (it would require
+threading the value through the client seam) and wouldn't cover mutations
+like `createBooking`. The module-global chance is the smallest surface that
+lets both tests and manual QA reach the server-error path.
+
+---
+
+## 7. Theme handled by a context provider + CSS-variable tokens, not per-component dark variants
+
+**Chosen:** `useTheme.tsx` is a small React context (`theme`,
+`toggleTheme`, persisted to `localStorage`) that toggles a `.dark` class on
+`<html>`. All themed colors are semantic CSS custom properties
+(`--color-surface`, `--color-text-primary`, `--color-success`, …) bridged
+into Tailwind via `@theme inline`, so components use `bg-surface` /
+`text-primary` and never write `dark:bg-gray-900` scatterings.
+
+**Why:** Semantic tokens keep dark mode consistent by construction: a
+component either uses the tokens (and adapts automatically) or doesn't, and
+that's easy to grep. Per-component `dark:` variants drift as the component
+set grows, which is exactly the "some text is black in dark mode" bug class
+this decision eliminates.
+
+**Alternatives considered:** Tailwind `dark:` variants everywhere; CSS
+Modules with a `.dark` cascade; a CSS-only `prefers-color-scheme` media
+query.
+
+**Why rejected:** `dark:` variants are what the project started as and were
+the source of the unreadable dark-mode text. Media-query-only theming can't
+honor an explicit user override persisted across sessions, which a
+marketplace UI needs.

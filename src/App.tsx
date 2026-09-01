@@ -1,12 +1,13 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { NavBar } from "./components/NavBar";
+import { Footer } from "./components/Footer";
 import { ServiceListPage } from "./features/services/ServiceListPage";
 import { ServiceDetailsPage } from "./features/services/ServiceDetailsPage";
 import { BookingPage } from "./features/booking/BookingPage";
 import { MyBookingsPage } from "./features/bookings/MyBookingsPage";
 import { BookingDetailsPage } from "./features/bookings/BookingDetailsPage";
-
+import { CategoryDetailsPage } from "./features/services/CategoryDetailsPage";
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -20,9 +21,9 @@ export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
-        <div className="min-h-screen bg-gray-50">
+        <div className="flex min-h-screen flex-col bg-[var(--color-surface-muted)] text-primary">
           <NavBar />
-          <main>
+          <main className="flex-1">
             <Routes>
               <Route path="/" element={<ServiceListPage />} />
               <Route
@@ -38,8 +39,13 @@ export default function App() {
                 path="/bookings/:bookingId"
                 element={<BookingDetailsPage />}
               />
+              <Route
+                path="/categories/:categoryName"
+                element={<CategoryDetailsPage />}
+              />
             </Routes>
           </main>
+          <Footer />
         </div>
       </BrowserRouter>
     </QueryClientProvider>

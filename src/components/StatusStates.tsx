@@ -28,11 +28,11 @@ export function ErrorState({
       role="alert"
       className="flex flex-col items-center justify-center py-16 gap-3 text-center"
     >
-      <p className="text-red-500 font-medium">{message}</p>
+      <p className="font-medium text-danger">{message}</p>
       {onRetry && (
         <button
           onClick={onRetry}
-          className="px-4 py-2 rounded-md bg-red-600 text-white text-sm hover:bg-red-700"
+          className="px-4 py-2 rounded-md bg-danger text-white text-sm hover:opacity-90"
         >
           Try again
         </button>

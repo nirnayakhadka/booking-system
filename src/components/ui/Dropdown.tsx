@@ -46,7 +46,7 @@ export function Dropdown({
         <div
           role="menu"
           onClick={() => setOpen(false)}
-          className={`absolute z-20 mt-2 w-64 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] py-1 shadow-lg ${
+          className={`absolute z-20 mt-2 w-64 rounded-lg bg-[var(--color-surface-raised)] py-1 shadow-xl ring-1 ring-[var(--color-border)] ${
             align === "right" ? "right-0" : "left-0"
           }`}
         >

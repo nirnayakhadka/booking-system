@@ -1,6 +1,11 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, afterEach } from 'vitest'
 import { getService, listServices } from './servicesApi'
 import { ApiRequestError } from '../../types/api'
+import { setServerErrorChance } from '../mock/utils'
+
+afterEach(() => {
+  setServerErrorChance(0)
+})
 
 describe('servicesApi.listServices', () => {
   it('returns all services when no filters are applied', async () => {
@@ -34,5 +39,10 @@ describe('servicesApi.getService', () => {
     } catch (err) {
       expect((err as ApiRequestError).code).toBe('NOT_FOUND')
     }
+  })
+
+  it('throws a SERVER_ERROR when server error simulation is enabled', async () => {
+    setServerErrorChance(1)
+    await expect(listServices()).rejects.toMatchObject({ code: 'SERVER_ERROR' })
   })
 })

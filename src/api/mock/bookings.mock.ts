@@ -2,7 +2,7 @@ import type { Booking, CreateBookingRequest, CreateBookingResult } from '../../t
 import { ApiRequestError } from '../../types/api'
 import { mockServices } from './data/services'
 import { mockBookings, addMockBooking, getBookedSlotKeys } from './data/bookings'
-import { simulateLatency } from './utils'
+import { maybeSimulateServerError, simulateLatency } from './utils'
 
 /**
  * Validation lives here (server-side, in the mock) rather than only in
@@ -37,6 +37,7 @@ export async function mockCreateBooking(
   request: CreateBookingRequest
 ): Promise<CreateBookingResult> {
   await simulateLatency()
+  maybeSimulateServerError()
 
   const errors = validateBookingRequest(request)
   if (Object.keys(errors).length > 0) {
@@ -77,6 +78,7 @@ export async function mockCreateBooking(
 
 export async function mockListBookings(): Promise<Booking[]> {
   await simulateLatency()
+  maybeSimulateServerError()
   return [...mockBookings].sort(
     (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
   )
@@ -84,6 +86,7 @@ export async function mockListBookings(): Promise<Booking[]> {
 
 export async function mockGetBookingById(bookingId: string): Promise<Booking> {
   await simulateLatency()
+  maybeSimulateServerError()
   const booking = mockBookings.find((b) => b.id === bookingId)
   if (!booking) {
     throw new ApiRequestError({

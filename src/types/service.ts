@@ -18,21 +18,8 @@ export interface Service {
   durationMinutes: number;
   rating: number;
   isAvailable: boolean;
+  imageUrl?: string;
 }
-
-/** Lightweight shape used in list views — avoids over-fetching full descriptions. */
-export type ServiceSummary = Pick<
-  Service,
-  | "id"
-  | "name"
-  | "category"
-  | "provider"
-  | "price"
-  | "currency"
-  | "rating"
-  | "isAvailable"
-  | "imageUrl"
->;
 
 export interface ServiceListParams {
   search?: string;
@@ -48,20 +35,16 @@ export interface TimeSlot {
   endTime: string; // "10:30"
   isAvailable: boolean;
 }
-
-export interface Service {
-  id: string;
-  name: string;
-  description: string;
-  category: string;
-  provider: {
-    id: string;
-    name: string;
-  };
-  price: number;
-  currency: string;
-  durationMinutes: number;
-  rating: number;
-  isAvailable: boolean;
-  imageUrl?: string;
-}
+export type ServiceSummary = Pick<
+  Service,
+  | "id"
+  | "name"
+  | "description"
+  | "category"
+  | "provider"
+  | "price"
+  | "currency"
+  | "rating"
+  | "isAvailable"
+  | "imageUrl"
+>;

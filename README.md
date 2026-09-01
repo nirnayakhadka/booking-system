@@ -1,9 +1,19 @@
 # Customer Service Booking System
 
 A React + TypeScript frontend implementing a customer service booking flow
-(Service List → Service Details → Booking → Confirmation → My Bookings)
+(Service List → Service Details → Select Date & Time → Confirm → My Bookings)
 for the "Demo Marketplace" platform, built against a self-contained mock
 API layer.
+
+## Features
+
+- **Service list** — search, category filter, loading / empty / error states
+- **Service details** — provider, price, duration, rating, availability
+- **Booking** — date & slot picker, customer details, live summary,
+  validation errors, and slot-conflict handling
+- **My bookings** — booking list with status badges + full booking details
+- **Dark mode** — theme toggle persisted across sessions, token-based theming
+- **Polish** — branded logo, responsive layout, staggered card entrances
 
 ## Stack
 
@@ -26,6 +36,14 @@ npm run dev
 See [`docs/setup.md`](docs/setup.md) for full details, and
 [`docs/architecture.md`](docs/architecture.md) for how the codebase is
 organized.
+
+## Testing the error paths
+
+The mock API simulates latency and a normalized `SERVER_ERROR`. Server
+errors are disabled by default so manual runs are stable — tests enable them
+with `setServerErrorChance(1)` (see `servicesApi.test.ts`). The seeded
+booking also lets you exercise the slot-conflict path by booking the same
+slot twice.
 
 ## Demo Video
 

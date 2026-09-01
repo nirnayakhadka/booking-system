@@ -28,7 +28,9 @@ describe('ServiceListPage', () => {
     expect(screen.getByRole('status')).toBeInTheDocument()
 
     await waitFor(() => {
-      expect(screen.getByText(/Deep Tissue Massage/i)).toBeInTheDocument()
+      // The featured service appears twice by design — in the hero banner
+      // and in the grid card — so all matches must be counted, not a unique one.
+      expect(screen.getAllByText(/Deep Tissue Massage/i).length).toBeGreaterThan(0)
     })
   })
 

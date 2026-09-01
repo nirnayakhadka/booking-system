@@ -12,11 +12,23 @@ export function simulateLatency(minMs = 300, maxMs = 800): Promise<void> {
 }
 
 /**
- * Small deliberate chance of a server error on read endpoints, so the
- * error UI path is exercised during normal manual testing instead of
- * only in unit tests. Disabled by default; call sites opt in.
+ * Configurable chance of a server error (HTTP 500). Defaults to 0 so
+ * tests and default manual runs are deterministic; opted into by tests
+ * (see servicesApi.test.ts) or by dev tooling wanting to exercise the
+ * error UI. Kept module-global so mock endpoints share one toggle
+ * instead of threading a probability through every call site.
  */
-export function maybeSimulateServerError(chance = 0): void {
+let serverErrorChance = 0
+
+export function setServerErrorChance(chance: number): void {
+  serverErrorChance = Math.max(0, Math.min(1, chance))
+}
+
+export function getServerErrorChance(): number {
+  return serverErrorChance
+}
+
+export function maybeSimulateServerError(chance = serverErrorChance): void {
   if (chance > 0 && Math.random() < chance) {
     throw new ApiRequestError({
       code: 'SERVER_ERROR',

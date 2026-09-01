@@ -1,10 +1,17 @@
-import type { Service, ServiceListParams, ServiceSummary, TimeSlot } from '../../types/service'
-import { request } from '../client/httpClient'
+import type {
+  Service,
+  ServiceListParams,
+  ServiceSummary,
+  TimeSlot,
+} from "../../types/service";
+import type { CategorySummary } from "../../types/category";
+import { request } from "../client/httpClient";
 import {
   mockGetServiceAvailability,
   mockGetServiceById,
   mockListServices,
-} from '../mock/services.mock'
+  mockListCategories,
+} from "../mock/services.mock";
 
 /**
  * These functions are what features/hooks import — never the mock
@@ -15,15 +22,19 @@ import {
  */
 
 export function listServices(
-  params?: ServiceListParams
+  params?: ServiceListParams,
 ): Promise<{ items: ServiceSummary[]; total: number }> {
-  return request(() => mockListServices(params))
+  return request(() => mockListServices(params));
 }
 
 export function getService(serviceId: string): Promise<Service> {
-  return request(() => mockGetServiceById(serviceId))
+  return request(() => mockGetServiceById(serviceId));
 }
 
 export function getServiceAvailability(serviceId: string): Promise<TimeSlot[]> {
-  return request(() => mockGetServiceAvailability(serviceId))
+  return request(() => mockGetServiceAvailability(serviceId));
+}
+
+export function listCategories(): Promise<CategorySummary[]> {
+  return request(() => mockListCategories());
 }

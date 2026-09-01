@@ -1,57 +1,69 @@
+// HeroSection.tsx
 import { useNavigate } from "react-router-dom";
+import { CategoryStrip } from "./CategoryStrip";
 import type { ServiceSummary } from "../../types/service";
 
 interface HeroSectionProps {
-  service: ServiceSummary;
+  services: ServiceSummary[];
 }
 
-/**
- * Featured banner above the service list. Takes a service already fetched
- * by the parent page rather than fetching its own data — avoids a second
- * network call for what's really just a different presentation of the
- * same list data.
- */
-export function HeroSection({ service }: HeroSectionProps) {
+export function HeroSection({ services }: HeroSectionProps) {
   const navigate = useNavigate();
+  if (services.length === 0) return null;
+
+  const [featured] = services;
 
   return (
-    <button
-      onClick={() => navigate(`/services/${service.id}`)}
-      className="group relative mb-8 block w-full overflow-hidden rounded-2xl text-left"
-    >
-      {/* Image layer — falls back to a brand-color gradient if no imageUrl */}
-      <div className="relative h-64 w-full sm:h-80">
-        {service.imageUrl ? (
+    <div className="w-full">
+      {/* Hero content is vertically centered, not pinned to the bottom —
+          that's what leaves clear space for the category strip to overlap
+          into without colliding with the CTA. */}
+      <div className="relative h-[460px] w-full overflow-hidden sm:h-[540px]">
+        {featured.imageUrl ? (
           <img
-            src={service.imageUrl}
+            src={featured.imageUrl}
             alt=""
-            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+            className="h-full w-full object-cover"
           />
         ) : (
           <div className="h-full w-full bg-gradient-to-br from-marketplace to-marketplace-dark" />
         )}
-        {/* Scrim so white text stays readable regardless of image brightness */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
-      </div>
+        <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/40 to-transparent" />
 
-      {/* Text overlay */}
-      <div className="absolute inset-x-0 bottom-0 p-6 sm:p-10">
-        <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-white/80">
-          Featured Service
-        </p>
-        <h2 className="text-2xl font-bold text-white transition group-hover:underline sm:text-4xl">
-          {service.name}
-        </h2>
-        <div className="mt-3 flex items-center gap-3 text-sm text-white/90">
-          <span>{service.category}</span>
-          <span className="h-1 w-1 rounded-full bg-white/60" />
-          <span>★ {service.rating}</span>
-          <span className="h-1 w-1 rounded-full bg-white/60" />
-          <span>
-            {service.currency} {service.price}
-          </span>
+        <div className="absolute inset-0 flex items-center">
+          <div className="w-full max-w-7xl mx-auto px-4 py-12 sm:px-6 lg:px-8">
+            <span className="inline-flex items-center rounded-full bg-white/15 px-3 py-1 text-xs font-medium text-white backdrop-blur-sm">
+              {featured.category}
+            </span>
+
+            <h1 className="mt-5 text-4xl font-semibold leading-[1.1] text-white sm:text-5xl">
+              {featured.name}
+            </h1>
+
+            <p className="mt-4 max-w-md text-sm leading-relaxed text-white/70 sm:text-base">
+              {featured.description}
+            </p>
+
+            <div className="mt-7 flex items-center gap-5">
+              <button
+                onClick={() => navigate(`/services/${featured.id}`)}
+                className="rounded-full bg-white px-6 py-3 text-sm font-semibold text-[var(--color-text-primary)] transition hover:bg-white/90 sm:text-base"
+              >
+                Book now
+              </button>
+              <span className="text-sm text-white/80">
+                {featured.currency} {featured.price} · ★ {featured.rating}
+              </span>
+            </div>
+          </div>
         </div>
       </div>
-    </button>
+
+      {/* Category strip overlaps the empty lower portion of the image
+          only — never the text block above, so nothing gets covered. */}
+      <div className="mx-auto -mt-14 max-w-7xl px-2 sm:px-4 lg:px-8">
+        <CategoryStrip />
+      </div>
+    </div>
   );
 }
