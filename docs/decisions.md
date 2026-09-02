@@ -101,8 +101,12 @@ actually change if a real backend later returns real UUIDs instead.
 ## 5. Tailwind utility classes directly in components, no separate component library
 
 **Chosen:** Styling is done with Tailwind utility classes inline in JSX,
-plus a small set of shared presentational components
-(`StatusStates.tsx`, `NavBar.tsx`) for cross-cutting UI.
+plus a small set of shared reusable components for cross-cutting UI:
+presentational states in `components/StatusStates.tsx`, primitives in
+`components/ui/` (`Button`, `Avatar`, `Dropdown`, `Logo`, `SearchInput`,
+`ServiceCard`, `ServiceGridCard`, `ThemeToggle`), and page-level scaffolding
+in `components/layout/` (`PageContainer`, `BackLink`, `BackToTop`),
+`BackToTop`).
 
 **Why:** The assignment explicitly deprioritizes visual complexity and UI
 polish relative to architecture/API/testing. Utility classes let styling
@@ -147,12 +151,15 @@ lets both tests and manual QA reach the server-error path.
 
 ## 7. Theme handled by a context provider + CSS-variable tokens, not per-component dark variants
 
-**Chosen:** `useTheme.tsx` is a small React context (`theme`,
-`toggleTheme`, persisted to `localStorage`) that toggles a `.dark` class on
-`<html>`. All themed colors are semantic CSS custom properties
-(`--color-surface`, `--color-text-primary`, `--color-success`, …) bridged
-into Tailwind via `@theme inline`, so components use `bg-surface` /
-`text-primary` and never write `dark:bg-gray-900` scatterings.
+**Chosen:** The theme is driven by a small React context persisted to
+`localStorage` that toggles a `.dark` class on `<html>`. The context, hook,
+and types live in `hooks/theme.ts`; the `ThemeProvider` component (the only
+thing that touches effects) lives in `hooks/useTheme.tsx` — split so the
+file exporting the component doesn't also export non-components (keeps
+fast-refresh and the `only-export-components` lint rule happy). All themed
+colors are semantic CSS custom properties (`--color-surface`,
+`--color-surface-raised`, `--color-text-primary`, `--color-success`, …)
+bridged into Tailwind via `@theme inline`.
 
 **Why:** Semantic tokens keep dark mode consistent by construction: a
 component either uses the tokens (and adapts automatically) or doesn't, and
@@ -168,3 +175,72 @@ query.
 the source of the unreadable dark-mode text. Media-query-only theming can't
 honor an explicit user override persisted across sessions, which a
 marketplace UI needs.
+
+---
+
+## 8. Client-side caching strategy (stand-in for a server/Redis cache)
+
+**Chosen:** Three cooperating layers, since this demo has no backend to put
+Redis behind:
+
+1. **TanStack Query cache** — `staleTime` 5 min, `gcTime` 10 min,
+   `refetchOnWindowFocus: false`. Revisiting a screen renders from cache
+   with no network work.
+2. **Warm request gate in the mock API** (`requestGate` in
+   `src/api/mock/utils.ts`) — the first request for a key pays the full
+   simulated latency (keeps loading states real and testable), but repeat
+   requests for the same data resolve in ~20-80ms. This mimics warming a
+   server-side cache key after the first hit.
+3. **localStorage-persisted mock store** (`data/bookings.ts`) — bookings
+   survive reloads, standing in for a real database/Redis persistence.
+
+Plus **route-level code splitting** (`React.lazy`) so the initial bundle
+only contains the shell + the one page being opened, and **prefetching on
+nav-link hover** so the next route is already in cache before the click.
+
+**Why:** The user asked for "Redis cache / fast page opens" but this repo
+is 100% client-side. These layers deliver the same *felt* result — instant
+revisits and reload-safe data — without introducing a fake backend, while
+still keeping the loading/error states the assignment's tests depend on.
+
+**Why rejected:** Adding a real HTTP server + Redis just to cache static
+mock data; shipping a service worker cache without a TTL strategy.
+
+---
+
+## 9. Perceived-performance and animation handled in code, not by adding libraries
+
+**Chosen:**
+
+- **Perceived performance:** route-level code splitting (`React.lazy` +
+  `Suspense` in `App.tsx`) so the initial bundle is shell + one page;
+  TanStack Query tuned for cache-first navigation (`staleTime` 5 min,
+  `gcTime` 10 min, no refetch on window focus); the warm request gate and
+  localStorage-backed booking store from decision #8; and `prefetchQuery`
+  on nav-link hover so the next route is already cached.
+- **Scroll UX:** `BackToTop` is a floating button that appears after
+  scrolling 400px and smooth-scrolls up. There is no auto jump to the top on
+  route change (`ScrollToTop` was removed) — navigation keeps the page's
+  scroll position, which feels smoother than being yanked to `(0, 0)`.
+- **Animations:** route changes replay a 300ms `page-in` fade/lift (the
+  routes wrapper is keyed by `pathname`); cards, strips, and the shared
+  `Button` get hover-lift and press-scale transitions; all of it is
+  disabled under `prefers-reduced-motion`.
+
+**Why:** The user asked for "Redis / fast opens" and "smooth animated"
+without a backend to attach Redis to (see #8), and without a
+dependencies-for-dependencies approach. CSS keyframes plus React's own
+lazy/prefetch/state-adjustment features deliver the same feel with zero
+new runtime dependencies, no animation-library lock-in, and full
+reduced-motion support.
+
+**Alternatives considered:** `framer-motion` for route transitions;
+`view-transitions-api`; pushing a state/value into a global router store to
+drive scroll restoration.
+
+**Why rejected:** Framer Motion is a meaningful bundle-cost and API
+addition for effects that CSS handles cleanly at this scale. The
+`view-transitions` API is still inconsistent across browsers and can't be
+safely keyed off `pathname` the way a class animation can. Scroll restoration
+is handled natively by the browser's default behavior, so a manual
+history-map would duplicate work.

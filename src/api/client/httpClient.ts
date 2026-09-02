@@ -1,6 +1,5 @@
 /**
- * The HTTP client is the single seam between "how we talk to a backend"
- * and everything else. Today it delegates to the mock implementations;
+ * . Today it delegates to the mock implementations;
  * swapping to a real backend later means rewriting only this file's
  * `request` function (e.g. to use fetch/axios) — no changes needed in
  * api/services, hooks, or components, since they only depend on this

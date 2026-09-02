@@ -8,7 +8,7 @@ import type { CategorySummary } from "../../types/category";
 import { ApiRequestError } from "../../types/api";
 import { mockServices } from "./data/services";
 import { getBookedSlotKeys } from "./data/bookings";
-import { maybeSimulateServerError, simulateLatency } from "./utils";
+import { maybeSimulateServerError, requestGate } from "./utils";
 
 function toSummary(service: Service): ServiceSummary {
   const {
@@ -40,7 +40,7 @@ function toSummary(service: Service): ServiceSummary {
 export async function mockListServices(
   params: ServiceListParams = {},
 ): Promise<{ items: ServiceSummary[]; total: number }> {
-  await simulateLatency();
+  await requestGate(`services:list:${JSON.stringify(params)}`);
   maybeSimulateServerError();
 
   const { search, category, page = 1, pageSize = 20 } = params;
@@ -65,7 +65,7 @@ export async function mockListServices(
 }
 
 export async function mockGetServiceById(serviceId: string): Promise<Service> {
-  await simulateLatency();
+  await requestGate(`services:detail:${serviceId}`);
   maybeSimulateServerError();
 
   const service = mockServices.find((s) => s.id === serviceId);
@@ -87,7 +87,7 @@ export async function mockGetServiceById(serviceId: string): Promise<Service> {
 export async function mockGetServiceAvailability(
   serviceId: string,
 ): Promise<TimeSlot[]> {
-  await simulateLatency();
+  await requestGate(`services:slots:${serviceId}`);
   maybeSimulateServerError();
 
   const service = mockServices.find((s) => s.id === serviceId);
@@ -135,7 +135,7 @@ export async function mockGetServiceAvailability(
  * name makes that category appear here with no separate list to update.
  */
 export async function mockListCategories(): Promise<CategorySummary[]> {
-  await simulateLatency();
+  await requestGate("services:categories");
   maybeSimulateServerError();
 
   const byCategory = new Map<string, CategorySummary>();

@@ -5,6 +5,8 @@
  * from re-inventing its own spinner/error markup.
  */
 
+import { Button } from "./ui/Button";
+
 export function LoadingState({ label = "Loading..." }: { label?: string }) {
   return (
     <div
@@ -15,6 +17,8 @@ export function LoadingState({ label = "Loading..." }: { label?: string }) {
     </div>
   );
 }
+
+
 
 export function ErrorState({
   message = "Something went wrong.",
@@ -30,12 +34,9 @@ export function ErrorState({
     >
       <p className="font-medium text-danger">{message}</p>
       {onRetry && (
-        <button
-          onClick={onRetry}
-          className="px-4 py-2 rounded-md bg-danger text-white text-sm hover:opacity-90"
-        >
+        <Button variant="danger" onClick={onRetry}>
           Try again
-        </button>
+        </Button>
       )}
     </div>
   );

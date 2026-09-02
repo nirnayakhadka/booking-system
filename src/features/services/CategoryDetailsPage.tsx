@@ -9,6 +9,8 @@ import {
 } from "../../components/StatusStates";
 import { ServiceCard } from "../../components/ui/ServiceCard";
 import { ServiceGridCard } from "../../components/ui/ServiceGridCard";
+import { PageContainer } from "../../components/layout/PageContainer";
+import { BackLink } from "../../components/layout/BackLink";
 import type { ServiceSummary } from "../../types/service";
 
 type SortOption = "best_match" | "price_low" | "price_high" | "rating";
@@ -61,13 +63,8 @@ export function CategoryDetailsPage() {
   const sortedItems = data ? sortServices(data.items, sort) : [];
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-6 sm:px-6 lg:px-8">
-      <button
-        onClick={() => navigate("/")}
-        className="mb-4 text-sm text-secondary hover:text-primary"
-      >
-        ← Back to all services
-      </button>
+    <PageContainer className="py-6">
+      <BackLink to="/">Back to all services</BackLink>
 
       <div className="flex flex-col gap-6 lg:flex-row">
         {/* Sidebar */}
@@ -195,6 +192,6 @@ export function CategoryDetailsPage() {
           )}
         </div>
       </div>
-    </div>
+    </PageContainer>
   );
 }

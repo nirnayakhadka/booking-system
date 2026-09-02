@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom'
 import { useBookings } from '../../hooks/useBookings'
 import { LoadingState, ErrorState, EmptyState } from '../../components/StatusStates'
+import { PageContainer } from '../../components/layout/PageContainer'
 
 const statusColor: Record<string, string> = {
   confirmed: 'bg-success-bg text-success-text',
@@ -14,7 +15,7 @@ export function MyBookingsPage() {
   const { data: bookings, isLoading, isError, refetch } = useBookings()
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-6 sm:px-6 lg:px-8">
+    <PageContainer className="py-6">
       <h1 className="mb-4 text-2xl font-semibold text-primary">My Bookings</h1>
 
       {isLoading && <LoadingState label="Loading bookings..." />}
@@ -54,6 +55,6 @@ export function MyBookingsPage() {
           ))}
         </ul>
       )}
-    </div>
+    </PageContainer>
   )
 }

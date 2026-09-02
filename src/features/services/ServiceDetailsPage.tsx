@@ -3,6 +3,8 @@ import { useNavigate, useParams } from "react-router-dom";
 import { useService } from "../../hooks/useService";
 import { LoadingState, ErrorState } from "../../components/StatusStates";
 import { Avatar } from "../../components/ui/Avatar";
+import { PageContainer } from "../../components/layout/PageContainer";
+import { BackLink } from "../../components/layout/BackLink";
 
 export function ServiceDetailsPage() {
   const { serviceId } = useParams<{ serviceId: string }>();
@@ -27,13 +29,8 @@ export function ServiceDetailsPage() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
-      <button
-        onClick={() => navigate(-1)}
-        className="mb-6 text-sm text-secondary hover:text-primary"
-      >
-        ← Back
-      </button>
+    <PageContainer className="py-8">
+      <BackLink />
 
       <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_380px]">
         {/* Left: image + thumbnails */}
@@ -163,6 +160,6 @@ export function ServiceDetailsPage() {
           </div>
         </dl>
       </div>
-    </div>
+    </PageContainer>
   );
 }

@@ -5,6 +5,11 @@ import type { Booking } from '../../../types/booking'
  * needs to append new bookings and this file is the single place that
  * happens, keeping "database" mutation out of the mock API functions
  * themselves and out of React entirely.
+ *
+ * The store is mirrored to localStorage so bookings you create survive
+ * a page reload (the browser tab is the "database" here, standing in for
+ * the server/Redis that a real deployment would have). Writes go through
+ * `addMockBooking` and are persisted there; reads stay synchronous.
  */
 export let mockBookings: Booking[] = [
   {
@@ -26,8 +31,36 @@ export let mockBookings: Booking[] = [
   },
 ]
 
+const STORAGE_KEY = 'marketplace/bookings/v1'
+
+function hydrateMockBookings(): Booking[] {
+  if (typeof localStorage === 'undefined') return mockBookings
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY)
+    if (raw) {
+      const parsed = JSON.parse(raw) as Booking[]
+      if (Array.isArray(parsed) && parsed.length > 0) return parsed
+    }
+  } catch {
+    // Corrupt or blocked storage — fall back to the seed data.
+  }
+  return mockBookings
+}
+
+mockBookings = hydrateMockBookings()
+
+function persistMockBookings(): void {
+  if (typeof localStorage === 'undefined') return
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(mockBookings))
+  } catch {
+    // Storage full or disabled — in-memory store still works this session.
+  }
+}
+
 export function addMockBooking(booking: Booking) {
   mockBookings = [...mockBookings, booking]
+  persistMockBookings()
 }
 
 /** Slots already booked for a given service, used to derive conflicts. */

@@ -1,11 +1,16 @@
 import { NavLink, useNavigate, useSearchParams } from "react-router-dom";
-import { useEffect, useState, type FormEvent } from "react";
+import { useState, type FormEvent } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { Avatar } from "./ui/Avatar";
 import { Dropdown } from "./ui/Dropdown";
 import { Logo } from "./ui/Logo";
 import { SearchInput } from "./ui/SearchInput";
 import { ThemeToggle } from "./ui/ThemeToggle";
 import { currentUser } from "../api/mock/data/user";
+import { listServices } from "../api/services/servicesApi";
+import { listBookings } from "../api/services/bookingsApi";
+import { listCategories } from "../api/services/servicesApi";
+import { queryKeys } from "../api/queryKeys";
 
 const navLinkClass = ({ isActive }: { isActive: boolean }) =>
   `px-3 py-2 text-sm font-medium rounded-md transition-colors ${
@@ -16,13 +21,44 @@ const navLinkClass = ({ isActive }: { isActive: boolean }) =>
 
 export function NavBar() {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [searchParams] = useSearchParams();
-  const [query, setQuery] = useState(searchParams.get("q") ?? "");
+  // The search box is a local draft that must also follow the URL's `q`
+  // param when the user navigates (back button, a link, search submit).
+  // Instead of syncing via an effect, we adjust state during render —
+  // the URL is the source of truth and the input state is just its mirror.
+  const urlQuery = searchParams.get("q") ?? "";
+  const [query, setQuery] = useState(urlQuery);
+  const [prevUrlQuery, setPrevUrlQuery] = useState(urlQuery);
   const [mobileOpen, setMobileOpen] = useState(false);
 
-  useEffect(() => {
-    setQuery(searchParams.get("q") ?? "");
-  }, [searchParams]);
+  if (prevUrlQuery !== urlQuery) {
+    setPrevUrlQuery(urlQuery);
+    setQuery(urlQuery);
+  }
+
+  function prefetchRoute(path: string) {
+    // Warm the cache for a route before the user even clicks, so the
+    // next page is already resolved by the time they arrive.
+    if (path === "/") {
+      void queryClient.prefetchQuery({
+        queryKey: queryKeys.services.list(),
+        queryFn: () => listServices(),
+        staleTime: 5 * 60 * 1000,
+      });
+      void queryClient.prefetchQuery({
+        queryKey: queryKeys.categories.all,
+        queryFn: () => listCategories(),
+        staleTime: 5 * 60 * 1000,
+      });
+    } else if (path === "/bookings") {
+      void queryClient.prefetchQuery({
+        queryKey: queryKeys.bookings.list(),
+        queryFn: () => listBookings(),
+        staleTime: 5 * 60 * 1000,
+      });
+    }
+  }
 
   function handleSearchSubmit(event: FormEvent) {
     event.preventDefault();
@@ -35,10 +71,19 @@ export function NavBar() {
         <Logo size="sm" withWordmark />
 
         <div className="hidden items-center gap-1 lg:flex">
-          <NavLink to="/" end className={navLinkClass}>
+          <NavLink
+            to="/"
+            end
+            className={navLinkClass}
+            onMouseEnter={() => prefetchRoute("/")}
+          >
             Services
           </NavLink>
-          <NavLink to="/bookings" className={navLinkClass}>
+          <NavLink
+            to="/bookings"
+            className={navLinkClass}
+            onMouseEnter={() => prefetchRoute("/bookings")}
+          >
             My Bookings
           </NavLink>
         </div>
@@ -117,6 +162,7 @@ export function NavBar() {
               to="/"
               end
               onClick={() => setMobileOpen(false)}
+              onMouseEnter={() => prefetchRoute("/")}
               className={navLinkClass}
             >
               Services
@@ -124,6 +170,7 @@ export function NavBar() {
             <NavLink
               to="/bookings"
               onClick={() => setMobileOpen(false)}
+              onMouseEnter={() => prefetchRoute("/bookings")}
               className={navLinkClass}
             >
               My Bookings

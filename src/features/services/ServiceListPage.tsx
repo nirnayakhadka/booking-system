@@ -8,6 +8,8 @@ import {
 } from "../../components/StatusStates";
 import { ServiceGridCard } from "../../components/ui/ServiceGridCard";
 import { HeroSection } from "./HeroSection";
+import { PageContainer } from "../../components/layout/PageContainer";
+
 
 export function ServiceListPage() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -39,7 +41,7 @@ export function ServiceListPage() {
         <HeroSection services={data.items} />
       )}
 
-      <div className="max-w-7xl mx-auto px-4 py-12 sm:px-6 lg:px-8">
+      <PageContainer className="py-12">
         <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
           <h1 className="text-xl font-semibold text-primary">
             {search ? `Results for "${search}"` : "Browse Services"}
@@ -105,7 +107,7 @@ export function ServiceListPage() {
             ))}
           </ul>
         )}
-      </div>
+      </PageContainer>
     </div>
   );
 }

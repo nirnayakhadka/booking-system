@@ -12,6 +12,28 @@ export function simulateLatency(minMs = 300, maxMs = 800): Promise<void> {
 }
 
 /**
+ * Warm/cold request gate — a stand-in for a server-side cache (e.g.
+ * Redis). The first request for a given key pays the full simulated
+ * latency (so loading states stay real and testable), but every repeat
+ * request for the same data resolves in ~20-80ms, which is what makes
+ * navigating back to a screen you already visited feel instant.
+ */
+const warmKeys = new Set<string>()
+
+export async function requestGate(key: string): Promise<void> {
+  if (warmKeys.has(key)) {
+    await simulateLatency(20, 80)
+    return
+  }
+  warmKeys.add(key)
+  await simulateLatency()
+}
+
+export function clearWarmCache(): void {
+  warmKeys.clear()
+}
+
+/**
  * Configurable chance of a server error (HTTP 500). Defaults to 0 so
  * tests and default manual runs are deterministic; opted into by tests
  * (see servicesApi.test.ts) or by dev tooling wanting to exercise the

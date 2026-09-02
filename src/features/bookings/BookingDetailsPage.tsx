@@ -1,7 +1,9 @@
-import { useLocation, useParams, useNavigate } from "react-router-dom";
+import { useLocation, useParams } from "react-router-dom";
 import { useBooking } from "../../hooks/useBooking";
 import { useService } from "../../hooks/useService";
 import { LoadingState, ErrorState } from "../../components/StatusStates";
+import { PageContainer } from "../../components/layout/PageContainer";
+import { BackLink } from "../../components/layout/BackLink";
 import type { BookingStatus } from "../../types/booking";
 
 const STATUS_STYLES: Record<BookingStatus, string> = {
@@ -14,7 +16,6 @@ const STATUS_STYLES: Record<BookingStatus, string> = {
 export function BookingDetailsPage() {
   const { bookingId } = useParams<{ bookingId: string }>();
   const location = useLocation();
-  const navigate = useNavigate();
   const justBooked = Boolean(
     (location.state as { justBooked?: boolean } | null)?.justBooked,
   );
@@ -38,13 +39,8 @@ export function BookingDetailsPage() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
-      <button
-        onClick={() => navigate("/bookings")}
-        className="mb-4 text-sm text-secondary hover:text-primary"
-      >
-        ← Back to my bookings
-      </button>
+    <PageContainer className="py-8">
+      <BackLink to="/bookings">Back to my bookings</BackLink>
 
       {justBooked && (
         <div className="mb-6 flex items-start gap-3 rounded-lg border border-success-border bg-success-bg p-4">
@@ -173,6 +169,6 @@ export function BookingDetailsPage() {
           </div>
         </div>
       </div>
-    </div>
+    </PageContainer>
   );
 }

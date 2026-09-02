@@ -16,6 +16,28 @@ All responses are JSON. Successful responses use the envelope:
 
 `fields` is only present for `VALIDATION_ERROR`.
 
+## Mock runtime behaviour
+
+The mock substitutes for a real backend and simulates the parts of one that
+shape the UI:
+
+- **Latency with a warm cache.** Every read endpoint gates through
+  `requestGate(key)` (see `src/api/mock/utils.ts`). The *first* request for
+  a given key waits ~300-800ms (so loading states are real and testable);
+  repeat requests for the same key resolve in ~20-80ms, standing in for a
+  warmed server/Redis cache.
+- **Configurable server errors.** Any endpoint can throw a normalized
+  `SERVER_ERROR` (HTTP 500). Off by default for deterministic
+  normal/test runs; flipped on via `setServerErrorChance(1)` in tests or
+  dev tooling.
+- **Persistent bookings.** `POST /bookings` writes through to the
+  localStorage-backed store, so bookings survive a page reload. The seeded
+  catalog is **107 services in 9 categories**; list data is paginated
+  (default `pageSize: 20`).
+
+> Note: the mock is in-process — the contract's status codes map one-to-one
+> onto the normalized API layer without a real HTTP round trip.
+
 ---
 
 ## `GET /api/v1/services`
@@ -45,7 +67,7 @@ All responses are JSON. Successful responses use the envelope:
       "isAvailable": true
     }
   ],
-  "meta": { "total": 5, "page": 1, "pageSize": 20 }
+  "meta": { "total": 107, "page": 1, "pageSize": 20 }
 }
 ```
 
@@ -54,6 +76,9 @@ All responses are JSON. Successful responses use the envelope:
 **Loading behaviour:** UI shows a loading indicator while the request is in flight.
 **Empty behaviour:** `data: []` with `meta.total: 0` — UI renders an empty state, not an error.
 **Error behaviour:** Non-2xx renders the shared error state with a retry action.
+
+The category filter is surfaced as a pill row on the service list page and
+drives the URLs for the per-category route (`/categories/{name}`).
 
 ---
 
@@ -102,6 +127,11 @@ All responses are JSON. Successful responses use the envelope:
   ]
 }
 ```
+
+The mock generates slots for the next 5 days at a fixed set of start times
+(09:00–16:00) and marks any slot already present in the booking store as
+unavailable, which is what makes the slot-conflict path reachable
+end-to-end.
 
 **Status codes:** `200` success, `404` service not found, `500` server error.
 

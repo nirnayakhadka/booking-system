@@ -9,14 +9,24 @@ afterEach(() => {
 
 describe('servicesApi.listServices', () => {
   it('returns all services when no filters are applied', async () => {
-    const result = await listServices()
+    const result = await listServices({ pageSize: 500 })
     expect(result.items.length).toBeGreaterThan(0)
     expect(result.total).toBe(result.items.length)
   })
 
   it('filters by search term (service list success path)', async () => {
-    const result = await listServices({ search: 'massage' })
-    expect(result.items.every((s) => s.name.toLowerCase().includes('massage'))).toBe(true)
+    const q = 'massage'
+    const result = await listServices({ search: q })
+    // The contract matches against name OR description, so assert the
+    // filter contract rather than the shape of any single fixture.
+    expect(result.items.length).toBeGreaterThan(0)
+    expect(
+      result.items.every(
+        (s) =>
+          s.name.toLowerCase().includes(q) ||
+          s.description.toLowerCase().includes(q),
+      ),
+    ).toBe(true)
   })
 
   it('returns an empty result set for a search with no matches', async () => {

@@ -7,17 +7,20 @@ API layer.
 
 ## Features
 
-- **Service list** — search, category filter, loading / empty / error states
+- **Service list** — search, category filter pils, loading / empty / error states, hero + category strip
 - **Service details** — provider, price, duration, rating, availability
-- **Booking** — date & slot picker, customer details, live summary,
+- **Booking** — date & slot picker, customer details, live sticky summary,
   validation errors, and slot-conflict handling
 - **My bookings** — booking list with status badges + full booking details
 - **Dark mode** — theme toggle persisted across sessions, token-based theming
-- **Polish** — branded logo, responsive layout, staggered card entrances
+- **Polish** — branded logo, responsive layout, staggered card entrances,
+  page transitions, scroll-to-top + back-to-top, hover/press micro-interactions
+- **Speed** — code-split routes, cache-first navigation with prefetch on hover,
+  warm request cache, and reload-safe bookings (localStorage)
 
 ## Stack
 
-React · TypeScript · Vite · Tailwind CSS · React Router · TanStack Query · Vitest + React Testing Library
+React · TypeScript · Vite · Tailwind CSS · React Router · TanStack Query · Vitest + React Testing Library · oxlint
 
 ## Documentation
 
